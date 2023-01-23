@@ -1,7 +1,54 @@
 '''Version 0.35'''
+import json
+import csv
+import spacy
+from spacy import displacy
+from collections import Counter
+import en_core_web_sm
+nlp = en_core_web_sm.load()
+
+#Initial Python File
+def loadjson():
+    #Load in JSON
+    file = open("Data/gg2013.json")
+    data = json.load(file)
+    print(data[0]['text'])
+    #print out first 20 tweets
+    count = 0
+    for i in data:
+        if count > 19:
+            break
+        print(i['timestamp'])
+        count += 1
+
+    return data
+
+def loadIMDb():
+
 
 OFFICIAL_AWARDS_1315 = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 OFFICIAL_AWARDS_1819 = ['best motion picture - drama', 'best motion picture - musical or comedy', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best performance by an actress in a motion picture - musical or comedy', 'best performance by an actor in a motion picture - musical or comedy', 'best performance by an actress in a supporting role in any motion picture', 'best performance by an actor in a supporting role in any motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best motion picture - animated', 'best motion picture - foreign language', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best television series - musical or comedy', 'best television limited series or motion picture made for television', 'best performance by an actress in a limited series or a motion picture made for television', 'best performance by an actor in a limited series or a motion picture made for television', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best performance by an actress in a television series - musical or comedy', 'best performance by an actor in a television series - musical or comedy', 'best performance by an actress in a supporting role in a series, limited series or motion picture made for television', 'best performance by an actor in a supporting role in a series, limited series or motion picture made for television', 'cecil b. demille award']
+
+class Award:
+    #initialize award
+    def __init__(self):
+        #Hard coded for now
+        self.name = "Best Motion Picture - Drama"
+        self.nominees = ["Argo", "Django Unchained", "Life of Pi", "Lincoln", "Zero Dark Thirty"]
+
+    def findWinner(self):
+        self.winner = "PLACEHOLDER"
+        return self.winner
+
+    def checkWinner(self):
+        #Type check for if winner is in our list of nominees
+        if self.winner in self.nominees:
+            #this means that we have found a winner in our list of nominees
+            return True
+        else:
+            return False
+        
+
 
 def get_hosts(year):
     '''Hosts is a list of one or more strings. Do NOT change the name
@@ -52,6 +99,8 @@ def main():
     run when grading. Do NOT change the name of this function or
     what it returns.'''
     # Your code here
+    # this function loads in our twitter database and stores it in variable
+    tweet_data = loadjson()
     return
 
 if __name__ == '__main__':
