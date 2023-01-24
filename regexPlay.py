@@ -6,15 +6,17 @@ import re
 # "[And the] Award [for Best Actor] goes to [Brad Pitt]"
 # "[Brad Pitt is the] winner [of Best Actor]"
 
-tweets = ["Brad Pitt wins Best Actor", "Micheal Bay wins best director", "Brad Pitt is such a stupid guy", "And the Award for best actor goes to Brad Pitt"]
+tweets = ["Argo wins Best Picture", "argo wins Best Motion Picture - Drama", "Django Unchained is Tarantino's best movie", "And the Award for best picture drama goes to Argo", "Zero Dark should've won Best Motion Picture - drama"]
 
-regular_expression_list = [r'[^a-zA-Z]wins[^a-zA-Z]', r'[^a-zA-Z][aA]ward[^a-zA-Z]goes to[^a-zA-Z]']
+regular_expression_list = [r'[^a-zA-Z]wins[^a-zA-Z]', r'[^a-zA-Z][aA]ward[^a-zA-Z]goes to[^a-zA-Z]', r'[^a-zA-Z]Best Motion Picture[^a-zA-Z]']
+
 
 
 kept_tweets = []
 for tweet in tweets:
     for reg in regular_expression_list:
         result = re.search(reg, tweet)
+        print(result)
         if result != None:
             #this means we have passed one of our regular expressions so we keep this tweet
             kept_tweets.append(tweet)
