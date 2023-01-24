@@ -34,10 +34,15 @@ for object in tweetdata[:200]:
 doc = nlp(full_string)
 len(doc.ents)
 labels = [x.label_ for x in doc.ents]     #tells us the number of words in each category
-print(Counter(labels))
+#print(Counter(labels))
+
+names = [x.text for x in doc.ents if x.label_ == "PERSON"]
+print(names)
+
+
 
 items = [x.text for x in doc.ents]
-print(Counter(items).most_common(3))      #tells us the three most common terms
+#print(Counter(items).most_common(3))      #tells us the three most common terms
 
 sentences = [x for x in doc.sents]
-print(sentences[20])
+#print(sentences[20])
