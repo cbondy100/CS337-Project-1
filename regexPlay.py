@@ -8,7 +8,7 @@ import re
 
 tweets = ["Argo wins Best Picture", "argo wins Best Motion Picture - Drama", "Django Unchained is Tarantino's best movie", "And the Award for best picture drama goes to Argo", "Zero Dark should've won Best Motion Picture - drama"]
 
-regular_expression_list = [r'[^a-zA-Z]wins[^a-zA-Z]', r'[^a-zA-Z][aA]ward[^a-zA-Z]goes to[^a-zA-Z]', r'[^a-zA-Z]Best Motion Picture[^a-zA-Z]']
+regular_expression_list = [r'[^a-zA-Z]wins[^a-zA-Z]', r'[^a-zA-Z][aA]ward[^a-zA-Z]goes to[^a-zA-Z]', r'[^a-zA-Z]best[.+]picture[^a-zA-Z]']
 
 
 
@@ -20,6 +20,7 @@ for tweet in tweets:
         if result != None:
             #this means we have passed one of our regular expressions so we keep this tweet
             kept_tweets.append(tweet)
+
             break
         else:
             print("Tweet thrown out")

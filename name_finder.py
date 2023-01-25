@@ -44,17 +44,20 @@ labels = [x.label_ for x in doc.ents]     #tells us the number of words in each 
 hard_code_nom = [["Argo", 0], ["Django Unchained", 0], ["Life of Pi", 0], ["Lincoln", 0], ["Zero Dark Thirty", 0]]
 golden_globes = gg_api.Award("Best Motion Picture - Drama", hard_code_nom)
 
-tweets = ["Argo wins Best Picture", "argo wins Best Motion Picture - Drama", "Django Unchained is Tarantino's best movie", "And the Award for best picture drama goes to Argo", "Zero Dark should've won Best Motion Picture - drama"]
+tweets = ["Argo wins Best Picture", "argo wins Best Motion Picture - Drama", "Django Unchained is Tarantino's best movie", "And the Award for best picture drama goes to Argo", "Zero Dark Thirty should've won Best Motion Picture - drama"]
 
 for tweet in tweets:
+    #tweet = tweet.lower()
     doc = nlp(tweet)
     len(doc.ents)
     names = [x.text for x in doc.ents]
     for x in doc:
-        for y in golden_globes.Nominee[0]:
-            yy = nlp(y)
-            if x == yy:
-                names.join(x)
+        for nom in hard_code_nom:
+            nom_name = nom[0]
+            nom_name = nlp(nom_name)
+            if x.text == nom_name.text:
+                names.append(x.text)
+        award = nlp(golden_globes.name)
     print(names)
 
 

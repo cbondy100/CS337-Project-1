@@ -15,14 +15,6 @@ def loadjson():
 
     file = open("Data/gg2013.json")
     data = json.load(file)
-    
-    #print out first 20 tweets (For Testing and Viewing)
-    #count = 0
-    #for i in data:
-    #    if count > 19:
-    #        break
-    #    print(i['text'])
-    #    count += 1
 
     return data
 
@@ -31,10 +23,6 @@ def loadIMDb():
 
 #OFFICIAL_AWARDS_1315 = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 #OFFICIAL_AWARDS_1819 = ['best motion picture - drama', 'best motion picture - musical or comedy', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best performance by an actress in a motion picture - musical or comedy', 'best performance by an actor in a motion picture - musical or comedy', 'best performance by an actress in a supporting role in any motion picture', 'best performance by an actor in a supporting role in any motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best motion picture - animated', 'best motion picture - foreign language', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best television series - musical or comedy', 'best television limited series or motion picture made for television', 'best performance by an actress in a limited series or a motion picture made for television', 'best performance by an actor in a limited series or a motion picture made for television', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best performance by an actress in a television series - musical or comedy', 'best performance by an actor in a television series - musical or comedy', 'best performance by an actress in a supporting role in a series, limited series or motion picture made for television', 'best performance by an actor in a supporting role in a series, limited series or motion picture made for television', 'cecil b. demille award']
-class Nominee:
-    def __init__(self):
-        self.nom = ""
-        self.confidence = 0
 
 class Award:
     #initialize award
@@ -42,9 +30,7 @@ class Award:
         #Hard coded for now
         self.name = name
         self.Nominee = nominees
-
-    def findWinner(self):
-        pass
+        self.winner = ""
 
     def checkWinner(self):
         #Type check for if winner is in our list of nominees
@@ -54,19 +40,47 @@ class Award:
         else:
             return False
 
-def findWinner(award, tweet_data):
+tweets = ["Argo wins Best Picture", "argo wins Best Motion Picture - Drama", "Django Unchained is Tarantino's best movie", "And the Award for best picture drama goes to Argo", "Zero Dark should've won Best Motion Picture - drama", "Argo win best picture award"]
+
+def buildRegex(award, element):
+    # function builds out our regular expressions
+    # i think there is a better way to do this
+
+    reg_ex_list = []
+    reg1 = r""+ element[0] + r".+" + award.name
+    reg2 = r".+(award).+(" + element[0] + ")"
+    reg3 = r"("+ element[0] + r")\s(wins?)+."
+    
+    reg_ex_list.append(reg1)
+    reg_ex_list.append(reg2)
+    reg_ex_list.append(reg3)
+    return reg_ex_list
+
+def buildConfidence(award, tweet_data):
+    # function builds out Nominees dictionary and adds
+    # to the "confidence" score based on how many RegEx 
+    # each nominee passes
+
+    winning_tweets = []
+
+    # go through each tweet and each nominee
+    # match family of regular expressions
     for tweet in tweet_data:
         text = tweet['text']
         for element in award.Nominee:
-            print(text)
-            reg_ex = r"/"+ element[0] + r"//" + award.name + r"/"
-            result = re.search(reg_ex, text)
-            if result != None:
-                print("something was found")
-                print(text)
-                winner = element[0]
-    print(winner)
-    return winner
+            reg_list = buildRegex(award, element)
+            
+            for reg in reg_list:
+                result = re.search(reg, text, re.IGNORECASE)
+                
+                # check if match exists
+                if result != None:
+                    print("Tweet: " + text)
+                    winning_tweets.append(text)
+                    element[1] += 1
+                    
+    # return list of winning tweets for visualization
+    return winning_tweets
 
 def get_hosts(year):
     '''Hosts is a list of one or more strings. Do NOT change the name
@@ -87,12 +101,18 @@ def get_nominees(year):
     # Your code here
     return nominees
 
-def get_winner(year):
-    winner = Nominee["", 0]
-    for cand in Award.Nominees[0]:
+def get_winner(award):
+    winner = ["", 0]
+    for cand in award.Nominee:
+        print(cand)
         if cand[1] > winner[1]:
+            print("new winner")
             winner = cand
-    return winner
+    if winner[0] != "":
+        award.winner = winner[0]
+    else:
+        return "inconclusive"
+        
 
 def get_presenters(year):
     '''Presenters is a dictionary with the hard coded award
@@ -122,12 +142,15 @@ def main():
     tweet_data = loadjson()
     hard_code_nom = [["Argo", 0], ["Django Unchained", 0], ["Life of Pi", 0], ["Lincoln", 0], ["Zero Dark Thirty", 0]]
     golden_globes = Award("Best Motion Picture - Drama", hard_code_nom)
+
+    hard_code_nom2 = [["Jessica Chastain", 0], ["Marion Cotillard", 0], ["Helen Mirren", 0], ["Naomi Watts", 0], ["Rachel Weisz", 0]]
+    golden_globes2 = Award("Best Actress - Motion Picture - Drama", hard_code_nom2)
     
-    winner = findWinner(golden_globes, tweet_data)
+    winner = buildConfidence(golden_globes2, tweet_data)
     print(winner)
-    
-    print("HELLO")
-    #print(win)
+    get_winner(golden_globes2)
+
+    print("Winner: " + golden_globes2.winner)
     return
 
 if __name__ == '__main__':
