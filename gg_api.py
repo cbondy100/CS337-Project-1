@@ -28,6 +28,10 @@ class Award:
     #initialize award
     def __init__(self, name, nominees):
         #Hard coded for now
+        #we should mane the name category a list of possible names
+        #for example Best Actress - Motion Picture - Drama would be:
+        # [best actress drama, best drama actress, best actress motion picture drama]
+        
         self.name = name
         self.Nominee = nominees
         self.winner = ""
@@ -59,10 +63,11 @@ def buildRegexWins(award, element):
 def buildRegexNom(award):
     reg_ex_list = []
     #reg1 = r".+(nominated?).+"
-    reg2 = r".+(nominated?)\s(for)\s(" + award.name +").+"
+    #reg2 = r".+(nominated?)\s(for)\s(" + award.name +").+"
+    reg3 = r".+(nominees?).+"
 
     #reg_ex_list.append(reg1)
-    reg_ex_list.append(reg2)
+    reg_ex_list.append(reg3)
     return reg_ex_list
 
 def buildNominees(award, tweet_data):
@@ -174,7 +179,7 @@ def main():
 
     #print("Winner: " + golden_globes2.winner)
     winning_noms = buildNominees(golden_globes, tweet_data)
-    print(winning_noms)
+    #print(winning_noms)
     return
 
 if __name__ == '__main__':
