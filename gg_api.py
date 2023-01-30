@@ -32,7 +32,7 @@ class Award:
         #for example Best Actress - Motion Picture - Drama would be:
         # [best actress drama, best drama actress, best actress motion picture drama]
         
-        self.name = name
+        self.names = name
         self.Nominee = nominees
         self.winner = ""
 
@@ -60,10 +60,14 @@ def buildRegexWins(award, element):
     reg_ex_list.append(reg3)
     return reg_ex_list
 
-def buildRegexNom(award):
+def buildRegexNom(award, name):
     reg_ex_list = []
     #reg1 = r".+(best actress).+(nominated?).+"
-    reg1 = r"(best actress drama)"
+    
+    #reg1 = r"(Naomi Watts)"
+    #reg1 = r"(Helen Mirren)"
+    reg1 = r"(Rachel Weisz)"
+    #reg4 = r"(Marion Cotillard)"
     #reg2 = r".+(nominated?)\s(for)\s(best actress).+"
 
     #Hard coding for best actress
@@ -72,18 +76,20 @@ def buildRegexNom(award):
     reg_ex_list.append(reg1)
     #reg_ex_list.append(reg2)
     #reg_ex_list.append(reg3)
+    #reg_ex_list.append(reg4)
     return reg_ex_list
 
 def buildNominees(award, tweet_data):
     winning_tweets = []
     for tweet in tweet_data:
         text = tweet['text']
-        reg_list = buildRegexNom(award)
-        for reg in reg_list:
-            result = re.search(reg, text, re.IGNORECASE)
-            if result != None:
-                print("Tweet: " + text)
-                winning_tweets.append(text)
+        for name in award.names:
+            reg_list = buildRegexNom(award, name)
+            for reg in reg_list:
+                result = re.search(reg, text, re.IGNORECASE)
+                if result != None:
+                    print("Tweet: " + text)
+                    winning_tweets.append(text)
 
     return winning_tweets
 
@@ -175,14 +181,16 @@ def main():
     golden_globes = Award("Best Actress", hard_code_nom)
 
     hard_code_nom2 = [["Jessica Chastain", 0], ["Marion Cotillard", 0], ["Helen Mirren", 0], ["Naomi Watts", 0], ["Rachel Weisz", 0]]
-    golden_globes2 = Award("Best Actress - Motion Picture - Drama", hard_code_nom2)
+    hc_award_names = ["Best Actress Drama", "Best Drama Actress", "Best Actress Motion Picture Drama", "Best Actress - Motion Picture - Drama"]
+    
+    golden_globes2 = Award(hc_award_names, hard_code_nom2)
     
     #winner = buildConfidence(golden_globes2, tweet_data)
     #print(winner)
     #get_winner(golden_globes2)
 
     #print("Winner: " + golden_globes2.winner)
-    winning_noms = buildNominees(golden_globes, tweet_data)
+    winning_noms = buildNominees(golden_globes2, tweet_data)
     print(winning_noms)
     return
 
