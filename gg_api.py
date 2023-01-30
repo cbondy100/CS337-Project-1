@@ -42,19 +42,41 @@ class Award:
 
 tweets = ["Argo wins Best Picture", "argo wins Best Motion Picture - Drama", "Django Unchained is Tarantino's best movie", "And the Award for best picture drama goes to Argo", "Zero Dark should've won Best Motion Picture - drama", "Argo win best picture award"]
 
-def buildRegex(award, element):
+def buildRegexWins(award, element):
     # function builds out our regular expressions
     # i think there is a better way to do this
 
     reg_ex_list = []
     reg1 = r""+ element[0] + r".+" + award.name
-    reg2 = r".+(award).+(" + element[0] + ")"
-    reg3 = r"("+ element[0] + r")\s(wins?)+."
+    reg2 = r".+(award).+(" + element[0] + r")"
+    reg3 = r"("+ element[0] + r")\s(wins?).+"
     
     reg_ex_list.append(reg1)
     reg_ex_list.append(reg2)
     reg_ex_list.append(reg3)
     return reg_ex_list
+
+def buildRegexNom(award):
+    reg_ex_list = []
+    #reg1 = r".+(nominated?).+"
+    reg2 = r".+(nominated?)\s(for)\s(" + award.name +").+"
+
+    #reg_ex_list.append(reg1)
+    reg_ex_list.append(reg2)
+    return reg_ex_list
+
+def buildNominees(award, tweet_data):
+    winning_tweets = []
+    for tweet in tweet_data:
+        text = tweet['text']
+        reg_list = buildRegexNom(award)
+        for reg in reg_list:
+            result = re.search(reg, text, re.IGNORECASE)
+            if result != None:
+                print("Tweet: " + text)
+                winning_tweets.append(text)
+
+    return winning_tweets
 
 def buildConfidence(award, tweet_data):
     # function builds out Nominees dictionary and adds
@@ -68,7 +90,7 @@ def buildConfidence(award, tweet_data):
     for tweet in tweet_data:
         text = tweet['text']
         for element in award.Nominee:
-            reg_list = buildRegex(award, element)
+            reg_list = buildRegexWins(award, element)
             
             for reg in reg_list:
                 result = re.search(reg, text, re.IGNORECASE)
@@ -141,16 +163,18 @@ def main():
     print('START OF CODE')
     tweet_data = loadjson()
     hard_code_nom = [["Argo", 0], ["Django Unchained", 0], ["Life of Pi", 0], ["Lincoln", 0], ["Zero Dark Thirty", 0]]
-    golden_globes = Award("Best Motion Picture - Drama", hard_code_nom)
+    golden_globes = Award("Best Actress", hard_code_nom)
 
     hard_code_nom2 = [["Jessica Chastain", 0], ["Marion Cotillard", 0], ["Helen Mirren", 0], ["Naomi Watts", 0], ["Rachel Weisz", 0]]
     golden_globes2 = Award("Best Actress - Motion Picture - Drama", hard_code_nom2)
     
-    winner = buildConfidence(golden_globes2, tweet_data)
-    print(winner)
-    get_winner(golden_globes2)
+    #winner = buildConfidence(golden_globes2, tweet_data)
+    #print(winner)
+    #get_winner(golden_globes2)
 
-    print("Winner: " + golden_globes2.winner)
+    #print("Winner: " + golden_globes2.winner)
+    winning_noms = buildNominees(golden_globes, tweet_data)
+    print(winning_noms)
     return
 
 if __name__ == '__main__':
