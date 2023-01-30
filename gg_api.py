@@ -62,12 +62,16 @@ def buildRegexWins(award, element):
 
 def buildRegexNom(award):
     reg_ex_list = []
-    #reg1 = r".+(nominated?).+"
-    #reg2 = r".+(nominated?)\s(for)\s(" + award.name +").+"
-    reg3 = r".+(nominees?).+"
+    #reg1 = r".+(best actress).+(nominated?).+"
+    reg1 = r"(best actress drama)"
+    #reg2 = r".+(nominated?)\s(for)\s(best actress).+"
 
-    #reg_ex_list.append(reg1)
-    reg_ex_list.append(reg3)
+    #Hard coding for best actress
+    #reg3 = r".+(best actress).+(nominees?).+"
+
+    reg_ex_list.append(reg1)
+    #reg_ex_list.append(reg2)
+    #reg_ex_list.append(reg3)
     return reg_ex_list
 
 def buildNominees(award, tweet_data):
@@ -179,7 +183,7 @@ def main():
 
     #print("Winner: " + golden_globes2.winner)
     winning_noms = buildNominees(golden_globes, tweet_data)
-    #print(winning_noms)
+    print(winning_noms)
     return
 
 if __name__ == '__main__':
