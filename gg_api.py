@@ -66,8 +66,8 @@ def buildRegexNom(award, name):
     
     #reg1 = r"(Naomi Watts)"
     #reg1 = r"(Helen Mirren)"
-    reg1 = r"(Rachel Weisz)"
-    #reg4 = r"(Marion Cotillard)"
+    #reg1 = r"(Rachel Weisz)"
+    reg1 = r"(Best Actress)"
     #reg2 = r".+(nominated?)\s(for)\s(best actress).+"
 
     #Hard coding for best actress
@@ -88,7 +88,7 @@ def buildNominees(award, tweet_data):
             for reg in reg_list:
                 result = re.search(reg, text, re.IGNORECASE)
                 if result != None:
-                    print("Tweet: " + text)
+                    #print("Tweet: " + text)
                     winning_tweets.append(text)
 
     return winning_tweets
@@ -191,7 +191,13 @@ def main():
 
     #print("Winner: " + golden_globes2.winner)
     winning_noms = buildNominees(golden_globes2, tweet_data)
-    print(winning_noms)
+    print(len(winning_noms))
+    print("BARRIER")
+    for tweet in winning_noms[:6500]:
+        result = re.search(r"^(?!.*TV).*(drama).*$", tweet, re.IGNORECASE)
+        if result != None:
+            print("Tweet: " + tweet)
+
     return
 
 if __name__ == '__main__':
