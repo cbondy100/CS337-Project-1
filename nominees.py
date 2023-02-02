@@ -40,14 +40,14 @@ def removePunc(tweet):
     chars += '"1234567890'
     for c in chars:
         tweet = tweet.replace(c, '')
-    return tweet.lower()
+    return tweet
 
 # lets make a function that takes in a set of tweets and applies a regular expression
 def tweetFilter(tweets, regex):
     tweet_list = []
     for tweet in tweets:
-        #tweet_text = removePunc(tweet['text'])
-        tweet_text = tweet['text']
+        tweet_text = removePunc(tweet['text'])
+        #tweet_text = tweet['text']
         match = re.search(regex, tweet_text)
         if match != None:
             tweet_list.append(tweet_text)
@@ -61,11 +61,17 @@ def get_nom_tweets(tweets):
 
 def checkNames(tweets):
     for tweet in tweets:
+        #tokenize tweet
         tokens = nltk.word_tokenize(tweet)
         tagged = nltk.pos_tag(tokens)
         entities = nltk.ne_chunk(tagged)
+        print(tweet)
         for chunk in entities:
-            print(chunk)
+            #only look at the trees
+            if type(chunk) == nltk.tree.Tree:
+                if chunk.label() == 'PERSON':
+                    print(chunk[0])
+                    
         
         #print(tweet)
         #proc_tweet = nlp(tweet)
