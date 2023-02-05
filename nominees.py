@@ -8,6 +8,9 @@ import jellyfish
 
 #nlp = en_core_web_sm.load()
 
+stop_words = nltk.corpus.stopwords.words('english')
+stop_words += ["RT"]
+award_stop_words = ["best", "picture", "motion", "drama", "golden", "globes", "goldenglobes", "actor", "actress", "musical", "comedy", "supporting", "director", "screenplay", "animated", "film", "films", "feature", "movie"]
 
 #Initial Python File
 def loadjson():
@@ -25,7 +28,9 @@ def loadjson():
     return data
 
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
-
+best_drama_names = ["best picture", "best drama", "best picture drama", "picture drama", "drama", "best picture - drama"]
+best_anim_names = ["best picture - animated", "animated", "best animation", "best pictured animated", "best animated picture", "best animated film", "film animated"]
+best_director = ["best director - motion picture", "best director", "best director motion", "best director"]
 #good regex: nomin((?:(?:at(?:ed|ion)))|ee)
 
 # tokenizes the specific tweet to pull out names
@@ -51,9 +56,8 @@ def removePunc(tweet):
 # input: tweets -> set of all tweets, regex -> regular expression
 # output: bool -> true if regex was matched, false otherwise
 def tweetFilter(tweet, regex):
-    tweet_text = removePunc(tweet)
     #tweet_text = tweet['text']
-    match = re.search(regex, tweet_text)
+    match = re.search(regex, tweet)
     if match != None:
         return True
     else:
@@ -62,20 +66,22 @@ def tweetFilter(tweet, regex):
 # helper function to get only nominated tweets
 # input: tweets -> set of all tweets
 # output: nom_tweets -> set of tweets with a form of nominate within
-def get_nom_tweets(tweets, award_list):
+def get_nom_tweets(tweets):
     # nomination regex
+    # gotta build some more regular expressions
+    # Nomination alt text: (deserved to win) (should have won) (wins over) (just beat) (wanted _ to win)
+    #Hotel Transylvania is nominated for Two golden globes tonight \"Best Animated Film\" and \" Outstanding Animation in an Animated Feature Film\""
     regex = re.compile(r"nomin((?:(?:at(?:ed|ion)))|ee)")
     # blacklist regex
-    regex_blacklist = re.compile(r"no.+nomin((?:(?:at(?:ed|ion)))|ee)")
+    #regex_blacklist = re.compile(r"no.+nomin((?:(?:at(?:ed|ion)))|ee)")
 
     nom_tweets = []
     for tweet in tweets:
-        tweet_text = removePunc(tweet["text"])
-        if tweetFilter(tweet_text, regex) and not tweetFilter(tweet_text, regex_blacklist):
-            #this means we matched out regex and did not match our blacklist
-            for award_name in award_list:
-                if award_name in tweet_text.lower():
-                    nom_tweets.append(tweet_text)
+        if tweetFilter(tweet, regex):
+            #this means we matched out regex
+            for award in best_director:
+                if award.lower() in tweet.lower():
+                    nom_tweets.append(tweet)
     return nom_tweets
     
 
@@ -89,7 +95,6 @@ def checkNames(tweet):
     tokens = nltk.word_tokenize(tweet)
     tagged = nltk.pos_tag(tokens)
     entities = nltk.ne_chunk(tagged)
-
     # loop through chunks to find the person    
     for chunk in entities:
         #only look at the trees
@@ -97,7 +102,8 @@ def checkNames(tweet):
             if chunk.label() == 'PERSON':
                 name_string = ""
                 for element in chunk:
-                    name_string += element[0] 
+                    if element[0].lower() not in award_stop_words:
+                        name_string = name_string + " " + element[0] 
                 name_list.append(name_string)
 
         #print(nom_list)
@@ -143,13 +149,29 @@ def countNames(name_list):
 
     print(full_count_dict)
 
+# this is a helper function to clean the tweet data
+# it strips punctuation along with removing stopwords
+def cleanTweets(tweet_data):
+    filteredTweets = []
+    get_substring = lambda s: s.split("@")[0] + s.split(":")[-1]
+    for tweet in tweet_data:
+        new_tweet = get_substring(tweet['text'])
+        tweet_text = removePunc(new_tweet)
+        words = nltk.word_tokenize(tweet_text)
+        wordsFiltered = []
+        for w in words:
+            if w not in stop_words:
+                wordsFiltered.append(w)
+        new_string = ' '.join(map(str, wordsFiltered))
+        filteredTweets.append(new_string)
+    return filteredTweets
+
 def testForAward(tweets):
     # dif names for same award (hardcoded)
     pass    
 
 if __name__ == '__main__': 
 
-    award_name_list = ["best actor", "best actor drama", "best actor motion picture drama", "actor drama", "drama actor", "award"]
     # From this awards list we would like to extract:
     # Jessica Chastain, Marion Cotillard, Helen Mirren, Naomi Watts, Rachel Weisz
 
@@ -158,20 +180,19 @@ if __name__ == '__main__':
     #"THE D IS SILENT" - nominee Marion Cotillard, seconds before flipping a table at the #goldenglobes
 
     tweet_data = loadjson()
-    nom_tweets = get_nom_tweets(tweet_data, award_name_list)
-    #print(nom_tweets)
-    name_list = buildNameList(nom_tweets)
-    countNames(name_list)
-    
-    print(jellyfish.jaro_distance(u"Lincoln", u"LincolnGoldenGlobes"))
-    print(jellyfish.jaro_distance(u"Lincoln", u"LincolnMakes"))
-    print(jellyfish.jaro_distance(u"Lincoln", u"Wow"))
-    print(jellyfish.jaro_distance(u"Lincoln", u"Argo"))
+    cleaned_data = cleanTweets(tweet_data)
+    print(cleaned_data)
+    nom_tweets = get_nom_tweets(cleaned_data)
+    print(nom_tweets)
+    #name_list = buildNameList(nom_tweets)
+    #countNames(name_list)
 
     '''
     for tweet in tweet_data:
        tweet_text = tweet['text']
-       if tweetFilter(tweet_text, r"([Jj]oaquin)"):
+       if tweetFilter(tweet_text, r"(Argo)"):
         print(tweet_text)
     '''
-    
+    #string = 
+    #get_substring = lambda s: s.split("@")[0] + s.split(":")[-1]
+    #print(get_substring(string))
