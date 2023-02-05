@@ -7,7 +7,7 @@ import re
 import string
 
 stop_words = nltk.corpus.stopwords.words('english')
-stop_words += ["RT"]
+stop_words += ["rt", "congrats", "congratulations", "woah", "wow", "woo"]
 
 #Initial Python File
 def loadjson():
@@ -49,6 +49,7 @@ def removeTags(tweet_text):
 # this is a helper function to clean the tweet data
 # it strips punctuation along with removing stopwords
 def cleanTweets(tweet_data):
+    #print(stop_words)
     filteredTweets = []
     #get_substring = lambda s: s.split("RT @")[0] + s.split(": ")[-1]
     for tweet in tweet_data:
@@ -61,7 +62,7 @@ def cleanTweets(tweet_data):
         words = nltk.word_tokenize(temp_tweet)
         wordsFiltered = []
         for w in words:
-            if w not in stop_words:
+            if w.lower() not in stop_words:
                 wordsFiltered.append(w)
         new_string = ' '.join(map(str, wordsFiltered))
         #print("Stop Words Removed: " + new_string + "\n")
