@@ -2,6 +2,7 @@
 import json
 import csv
 import re
+from nominees import *
 
 #Initial Python File
 def loadjson():
@@ -61,25 +62,6 @@ def buildRegexWins(award, element):
     reg_ex_list.append(reg3)
     return reg_ex_list
 
-def buildRegexNom(award, name):
-    reg_ex_list = []
-    #reg1 = r".+(best actress).+(nominated?).+"
-    
-    #reg1 = r"(Naomi Watts)"
-    #reg1 = r"(Helen Mirren)"
-    #reg1 = r"(Rachel Weisz)"
-    reg1 = r"(Best Actress)"
-    #reg2 = r".+(nominated?)\s(for)\s(best actress).+"
-
-    #Hard coding for best actress
-    #reg3 = r".+(best actress).+(nominees?).+"
-
-    reg_ex_list.append(reg1)
-    #reg_ex_list.append(reg2)
-    #reg_ex_list.append(reg3)
-    #reg_ex_list.append(reg4)
-    return reg_ex_list
-
 def buildRegexAward():
     reg_ex_list = []
     #reg1 = r".+(best actress).+(nominated?).+"
@@ -118,7 +100,6 @@ def buildNominees(award, tweet_data):
                     winning_tweets.append(text)
 
     return winning_tweets
-
 
 
 def buildConfidence(award, tweet_data):
