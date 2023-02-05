@@ -24,10 +24,8 @@ def loadjson():
     #   "id": tweet id
     #   "timestamp_ms": time of tweet (Long float structure)
     # }
-
-    file = open("Data/gg2013.json")
-    data = json.load(file)
-
+    with open("Data/cleaned_tweets.txt", "r") as fp:
+        data = json.load(fp)
     return data
 
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
@@ -142,24 +140,47 @@ def countNames(name_list):
     
     for name in name_list:
         full_count_dict[name] = full_count_dict.get(name, 0) + 1
-    '''
-    for element in full_count_list:
-        for name in name_list:
-            print(element[0] + name)
-            if name == element[0]:
-                print("FOUND A MATCH: " + name)
-                element[1] += 1
-                print(full_count_list)
-                
-            else:
-                print("ADD A NEW NOMINEE: " + name)
-                full_count_list.append([name, 1])
-                #name_list.remove(name)
-                print(full_count_list)
-    '''    
 
     print(full_count_dict)
 
+if __name__ == '__main__': 
+
+    # From this awards list we would like to extract:
+    # Jessica Chastain, Marion Cotillard, Helen Mirren, Naomi Watts, Rachel Weisz
+
+    #@glasneronfilm @ZulekhaNathoo Best Actress-Drama, I'm calling Naomi Watts.  Best Actress-Musical/Comedy, Jennifer Lawrence. #goldenglobes
+    #RETWEET if you think she deserves to win for her performance in #TheImpossible.
+    #"THE D IS SILENT" - nominee Marion Cotillard, seconds before flipping a table at the #goldenglobes
+
+    #sample_tweet_data = ["RT @ BrookeAnderson : Ang Lee , nominated Best Director work @ LifeofPiMovie", "Ben affleck nominated for Best Director"]
+
+    cleaned_tweet_data = loadjson()
+    #cleaned_data = cleanTweets(tweet_data)
+
+    print(cleaned_tweet_data[:20])
+
+    #for tweet in cleaned_data:
+    #    if "Ang Lee" in tweet:
+    #        print("FOUND ANG LEE IN CLEANED DATA")
+    #        print(tweet)
+    #nom_tweets = get_nom_tweets(cleaned_data)
+    #print(nom_tweets)
+    #name_list = buildNameList(nom_tweets)
+    #print(name_list)
+    #countNames(name_list)
+
+    '''
+    for tweet in tweet_data:
+       tweet_text = tweet['text']
+       if tweetFilter(tweet_text, r"(Argo)"):
+        print(tweet_text)
+    '''
+    #string = 
+    #get_substring = lambda s: s.split("@")[0] + s.split(":")[-1]
+    #print(get_substring(string))
+    #"RT @ BrookeAnderson : Ang Lee , nominated Best Director work @ LifeofPiMovie"
+
+    '''
 # helper function to remove all links from tweets
 def removeLink(tweet_text):
     regex = re.compile(r"((https?):((//)|(\\\\)).+((#!)?)*)")
@@ -185,7 +206,7 @@ def removeTags(tweet_text):
 # it strips punctuation along with removing stopwords
 def cleanTweets(tweet_data):
     filteredTweets = []
-    get_substring = lambda s: s.split("RT @")[0] + s.split(": ")[-1]
+    #get_substring = lambda s: s.split("RT @")[0] + s.split(": ")[-1]
     for tweet in tweet_data:
         #print("Original Tweet: " + tweet['text'])
         temp_tweet = removeLink(tweet['text'])
@@ -202,42 +223,4 @@ def cleanTweets(tweet_data):
         #print("Stop Words Removed: " + new_string + "\n")
         filteredTweets.append(new_string)
     return filteredTweets
-
-def testForAward(tweets):
-    # dif names for same award (hardcoded)
-    pass    
-
-if __name__ == '__main__': 
-
-    # From this awards list we would like to extract:
-    # Jessica Chastain, Marion Cotillard, Helen Mirren, Naomi Watts, Rachel Weisz
-
-    #@glasneronfilm @ZulekhaNathoo Best Actress-Drama, I'm calling Naomi Watts.  Best Actress-Musical/Comedy, Jennifer Lawrence. #goldenglobes
-    #RETWEET if you think she deserves to win for her performance in #TheImpossible.
-    #"THE D IS SILENT" - nominee Marion Cotillard, seconds before flipping a table at the #goldenglobes
-
-    #sample_tweet_data = ["RT @ BrookeAnderson : Ang Lee , nominated Best Director work @ LifeofPiMovie", "Ben affleck nominated for Best Director"]
-
-    tweet_data = loadjson()
-    cleaned_data = cleanTweets(tweet_data)
-
-    #for tweet in cleaned_data:
-    #    if "Ang Lee" in tweet:
-    #        print("FOUND ANG LEE IN CLEANED DATA")
-    #        print(tweet)
-    nom_tweets = get_nom_tweets(cleaned_data)
-    #print(nom_tweets)
-    name_list = buildNameList(nom_tweets)
-    print(name_list)
-    #countNames(name_list)
-
-    '''
-    for tweet in tweet_data:
-       tweet_text = tweet['text']
-       if tweetFilter(tweet_text, r"(Argo)"):
-        print(tweet_text)
-    '''
-    #string = 
-    #get_substring = lambda s: s.split("@")[0] + s.split(":")[-1]
-    #print(get_substring(string))
-    #"RT @ BrookeAnderson : Ang Lee , nominated Best Director work @ LifeofPiMovie"
+'''
