@@ -1,4 +1,7 @@
 #Will get all the nominees for a given award
+# will need a different classifyer for movie awards than people awards
+# from the set of tweets build a stopword list based on the awards and ceremony
+# write some more regular expressions to improve our nomination tweet set
 
 import json
 import nltk
@@ -30,7 +33,7 @@ def loadjson():
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 best_drama_names = ["best picture", "best drama", "best picture drama", "picture drama", "drama", "best picture - drama"]
 best_anim_names = ["best picture - animated", "animated", "best animation", "best pictured animated", "best animated picture", "best animated film", "film animated"]
-best_director = ["best director - motion picture", "best director motion", "best director"]
+best_director = ["best director - motion picture", "best director motion", "best director", "director"]
 #good regex: nomin((?:(?:at(?:ed|ion)))|ee)
 
 # tokenizes the specific tweet to pull out names
