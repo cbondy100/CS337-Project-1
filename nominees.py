@@ -30,7 +30,7 @@ def loadjson():
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 best_drama_names = ["best picture", "best drama", "best picture drama", "picture drama", "drama", "best picture - drama"]
 best_anim_names = ["best picture - animated", "animated", "best animation", "best pictured animated", "best animated picture", "best animated film", "film animated"]
-best_director = ["best director - motion picture", "best director", "best director motion", "best director"]
+best_director = ["best director - motion picture", "best director motion", "best director"]
 #good regex: nomin((?:(?:at(?:ed|ion)))|ee)
 
 # tokenizes the specific tweet to pull out names
@@ -155,7 +155,7 @@ def cleanTweets(tweet_data):
     filteredTweets = []
     get_substring = lambda s: s.split("@")[0] + s.split(":")[-1]
     for tweet in tweet_data:
-        new_tweet = get_substring(tweet['text'])
+        new_tweet = get_substring(tweet)
         tweet_text = removePunc(new_tweet)
         words = nltk.word_tokenize(tweet_text)
         wordsFiltered = []
@@ -179,9 +179,10 @@ if __name__ == '__main__':
     #RETWEET if you think she deserves to win for her performance in #TheImpossible.
     #"THE D IS SILENT" - nominee Marion Cotillard, seconds before flipping a table at the #goldenglobes
 
+    sample_tweet_data = ["RT @ BrookeAnderson : Ang Lee , nominated Best Director work @ LifeofPiMovie", "Ben affleck nominated for Best Director"]
+
     tweet_data = loadjson()
-    cleaned_data = cleanTweets(tweet_data)
-    print(cleaned_data)
+    cleaned_data = cleanTweets(sample_tweet_data)
     nom_tweets = get_nom_tweets(cleaned_data)
     print(nom_tweets)
     #name_list = buildNameList(nom_tweets)
@@ -196,3 +197,4 @@ if __name__ == '__main__':
     #string = 
     #get_substring = lambda s: s.split("@")[0] + s.split(":")[-1]
     #print(get_substring(string))
+    #"RT @ BrookeAnderson : Ang Lee , nominated Best Director work @ LifeofPiMovie"
