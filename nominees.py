@@ -64,25 +64,38 @@ def tweetFilter(tweet, regex):
     else:
         return False
 
-# helper function to get only nominated tweets
+# helper function to get only nominated tweets for specific award
 # input: tweets -> set of all tweets
 # output: nom_tweets -> set of tweets with a form of nominate within
 def get_nom_tweets(tweets):
+    regex_list = [
+        r"nomin((?:(?:at(?:ed|ion)))|ee)",
+        r"(\bwant\b|wants|wanted|wanting|deserves?|deserved|should).*(win|won)",
+    ]
     # nomination regex
     # gotta build some more regular expressions
-    # Nomination alt text: (deserved to win) (should have won) (wins over) (just beat) (wanted _ to win)
+    # Nomination alt text: 
+    # (deserved to win) 
+    # (should have won) 
+    # (wins over) 
+    # (just beat) 
+    # (wanted _ to win)
+    # 
     #Hotel Transylvania is nominated for Two golden globes tonight \"Best Animated Film\" and \" Outstanding Animation in an Animated Feature Film\""
-    regex = re.compile(r"nomin((?:(?:at(?:ed|ion)))|ee)")
+    #regex = re.compile(r"nomin((?:(?:at(?:ed|ion)))|ee)")
     # blacklist regex
     #regex_blacklist = re.compile(r"no.+nomin((?:(?:at(?:ed|ion)))|ee)")
 
     nom_tweets = []
     for tweet in tweets:
-        if tweetFilter(tweet, regex):
-            #this means we matched out regex
-            for award in best_director:
-                if award.lower() in tweet.lower():
-                    nom_tweets.append(tweet)
+        for reg_exp in regex_list:
+            regex = re.compile(reg_exp)
+            if tweetFilter(tweet, regex):
+                #this means we matched our regex
+                for award in best_director:
+                    if award.lower() in tweet.lower():
+                        nom_tweets.append(tweet)
+                break
     return nom_tweets
     
 
@@ -141,7 +154,7 @@ def countNames(name_list):
     for name in name_list:
         full_count_dict[name] = full_count_dict.get(name, 0) + 1
 
-    print(full_count_dict)
+    return full_count_dict
 
 if __name__ == '__main__': 
 
@@ -157,18 +170,17 @@ if __name__ == '__main__':
     cleaned_tweet_data = loadjson()
     #cleaned_data = cleanTweets(tweet_data)
 
-    print(cleaned_tweet_data[:20])
-
     #for tweet in cleaned_data:
     #    if "Ang Lee" in tweet:
     #        print("FOUND ANG LEE IN CLEANED DATA")
     #        print(tweet)
-    #nom_tweets = get_nom_tweets(cleaned_data)
-    #print(nom_tweets)
-    #name_list = buildNameList(nom_tweets)
-    #print(name_list)
-    #countNames(name_list)
-
+    nom_tweets = get_nom_tweets(cleaned_tweet_data)
+    print(nom_tweets)
+    name_list = buildNameList(nom_tweets)
+    print(name_list)
+    names_dict = countNames(name_list)
+    sorted_list = sorted(names_dict.items(), key = lambda kv: kv[1])
+    print(sorted_list)
     '''
     for tweet in tweet_data:
        tweet_text = tweet['text']
