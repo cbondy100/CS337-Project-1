@@ -35,6 +35,7 @@ class Award:
         self.names = name
         self.Nominee = nominees
         self.winner = ""
+        self.presenters = ""
 
     def checkWinner(self):
         #Type check for if winner is in our list of nominees
@@ -79,12 +80,37 @@ def buildRegexNom(award, name):
     #reg_ex_list.append(reg4)
     return reg_ex_list
 
+def buildRegexAward():
+    reg_ex_list = []
+    #reg1 = r".+(best actress).+(nominated?).+"
+    #reg1 = r".+(wins best ).+(-).+$"
+    reg2 = r".+ (best).+"
+    #reg3 = r".+ (nominated for) .+"
+    reg3 = r".+ (award) .+"
+    reg4 = r".+ w((?:(?:in(?:ner)|on))|ins?) .+"
+    reg5 = r".+ nomin((?:(?:at(?:ed)|ion))|ee|ees?) .+"
+    #reg6 = r".+
+    
+    #reg2 = r".+(nominated?)\s(for)\s(best actress).+"
+
+    #Hard coding for best actress
+    #reg3 = r".+(best actress).+(nominees?).+"
+
+    #reg_ex_list.append(reg1)
+    reg_ex_list.append(reg2)
+    reg_ex_list.append(reg3)
+    reg_ex_list.append(reg4)
+    reg_ex_list.append(reg5)
+    
+    return reg_ex_list
+
 def buildNominees(award, tweet_data):
     winning_tweets = []
     for tweet in tweet_data:
         text = tweet['text']
         for name in award.names:
-            reg_list = buildRegexNom(award, name)
+            #reg_list = buildRegexNom(award, name)
+            reg_list = buildRegexAward()
             for reg in reg_list:
                 result = re.search(reg, text, re.IGNORECASE)
                 if result != None:
@@ -92,6 +118,8 @@ def buildNominees(award, tweet_data):
                     winning_tweets.append(text)
 
     return winning_tweets
+
+
 
 def buildConfidence(award, tweet_data):
     # function builds out Nominees dictionary and adds
@@ -149,7 +177,62 @@ def get_winner(award):
         award.winner = winner[0]
     else:
         return "inconclusive"
+
+
+def potenchAwards(tweets):
+    maybeAward = []
+    #patterns = [r'best+(\b\w.+)+(?= at| for)']
+    #patterns = [r'(w((?:in(?:ner)|on))|ins?)+\s(\b\w.+)+(?= at| for| in| http)']
+    #patterns = [r'best.+(?= at| for| in| http| \B#)']
+    #patterns = [r'best.+(?= for)', r'best.+\B#', r'best.+(?= at)']
+
+    #pattern1 =  [r'won\s+(\b\w.+)+(?= at| for)', r'wins\s+(\b\w.+)+(?= http)', r'won\s+(\b\w.+)+(?= http)', r'wins\s+(\b\w.+)+\B.', r'for\s+(\b\w.+)+(goes to).+\B.', r'won\s+(\b\w.+)+\B.', r'for\s+(\b\w.+)+(goes to).+\B#', r'(nominated for)\s+(\b\w.+)+(?= at| for)']
+    
+        #in this iteration, refine to most specific 
+    #for tweet in tweets:
+        #tweet = tweet.lower()
+       # for pattern in patterns:
+            #matches = re.findall(pattern, tweet)
+            #for award in matches:
+               # maybeAward.append(award)
+    pattern = re.compile("Best ([A-z\s-]+)[A-Z][a-z]*[^A-z]")
+    maybeAward = [pattern.search(tweet).group(0)[:-1] for tweet in tweets if pattern.search(tweet)]
+    #pattern1 = re.compile(".*^((?!(goes|was|award|win| is| to)).)*$")
+    pattern1 = re.compile(".*^((?!(goes|but|award|is|win)).)*$")
+    maybeAward = [pattern1.match(tweet).group(0).lower() for tweet in maybeAward if pattern1.match(tweet)]
+
+    pattern2 = re.compile('.+(?= for)')
+    maybeAward = [pattern2.match(tweet).group(0) for tweet in maybeAward if pattern2.match(tweet)]
+    huh = []
+    for award in maybeAward:
+        award = award.replace(' -', '')
+        award = award.replace('-', '')
+        words = len(award.split())
+        if words > 2 and words < 10: 
+            huh.append(award)
+
+    #pattern2 = re.compile('.+(?= at)')
+    #huh = [pattern2.match(tweet).group(0) for tweet in huh if pattern2.match(tweet)]
+    
         
+
+                    #words = award.split()
+                    #if ("for" or "in" or "at" or "#" or "http") in words:
+                        #awd = words[:words.index()]
+                        #maybeAward.append(words[:words.index("for")])
+                    #else:
+                       #maybeAward.append(award)
+    
+    #phrase_counts = dict(Counter(maybeAward))
+
+    phrase_counts = dict(Counter(huh))
+    award_list = dict(sorted(phrase_counts.items(), key=lambda x: x[1], reverse=True))
+    awdls2 = []
+    for awd in award_list:
+        if phrase_counts[awd] > 1:
+            awdls2.append(awd)
+
+    return awdls2     
 
 def get_presenters(year):
     '''Presenters is a dictionary with the hard coded award
@@ -158,6 +241,10 @@ def get_presenters(year):
     # Your code here
     return presenters
 
+def humanReadable(awards):
+    for award in awards:
+        print("Award:", award.name, "\nPresenters:", award.presenter, "\nNominees: ", award.Nominee, "\nWeiner: ", award.winner, "\n\n")
+    
 def pre_ceremony():
     '''This function loads/fetches/processes any data your program
     will use, and stores that data in your DB or in a json, csv, or
@@ -197,6 +284,18 @@ def main():
         result = re.search(r"^(?!.*TV).*(drama).*$", tweet, re.IGNORECASE)
         if result != None:
             print("Tweet: " + tweet)
+
+
+    phrase_counts = potenchAwards(winning_noms)
+    print("Phrase Counts: ", phrase_counts)
+
+    awards = []
+    for awd in phrase_counts:
+        award = Award(awd, None)
+        awards.append(award)
+
+    with open("Data/output.json", "w") as file:
+        json.dump(awards, file)
 
     return
 
