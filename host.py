@@ -37,7 +37,7 @@ def tweetFilter(tweet, regex):
 # helper function to get only nominated tweets for specific award
 # input: tweets -> set of all tweets
 # output: nom_tweets -> set of tweets with a form of nominate within
-def get_pres_tweets(tweets, award_list):
+def get_host_tweets(tweets):
     regex_list = [
         r"(hosts?|hosting)"
     ]
@@ -107,13 +107,13 @@ def countNames(name_list):
 def getHost():
     cleaned_tweet_data = loadjson("Data/cleaned_tweets.txt")
 
-    nom_tweets = get_pres_tweets(cleaned_tweet_data)
-    name_list = buildNameList(nom_tweets)
+    host_tweets = get_host_tweets(cleaned_tweet_data)
+    name_list = buildNameList(host_tweets)
     names_dict = countNames(name_list)
     sorted_list = sorted(names_dict.items(), key = lambda kv: kv[1])
     
     final_list = []
-    for element in sorted_list[-1:]:
+    for element in sorted_list[-2:]:
         final_list.append(element[0])
     
     hosts = final_list

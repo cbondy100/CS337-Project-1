@@ -131,9 +131,9 @@ def get_nominees(award_list):
     nominees = {}
     for award in award_list:
         nom_list = []
-        for nominee in award.Nominees:
+        for nominee in award.Nominee:
             nom_list.append(nominee[0])
-        nominees[award.name] = nom_list
+        nominees[award.names] = nom_list
     return nominees
 
 def get_winner(award):
@@ -156,12 +156,10 @@ def dupAwards(awards_f, award):
     return bool
 
 def buildNoms(awards):
-    print("BUILDING NOMINATIONS")
     for award in awards:
         getFinalNoms(award)
         getFinalPres(award)
         if dupAwards(awards, award):
-            print("POPPED: ", award.names)
             awards.remove(award)
 
     return awards
@@ -224,6 +222,15 @@ def pre_ceremony():
     print("Pre-ceremony processing complete.")
     return
 
+def get_nominees_list(nominee_list):
+    '''Nominees is a dictionary with the hard coded award
+    names as keys, and each entry a list of strings. Do NOT change
+    the name of this function or what it returns.'''
+    nominees = []
+    for nom in nominee_list:
+        nominees.append(nom[0])
+    return nominees
+
 def main():
     '''This function calls your program. Typing "python gg_api.py"
     will run this function. Or, in the interpreter, import gg_api
@@ -232,39 +239,20 @@ def main():
     what it returns.'''
     # Your code here
     # this function loads in our twitter database and stores it in variable
-   # print('START OF CODE')
-    
-    '''
-    winning_noms = buildNominees(golden_globes2, tweet_data)
-    print(len(winning_noms))
-    print("BARRIER")
-    for tweet in winning_noms[:6500]:
-        result = re.search(r"^(?!.*TV).*(drama).*$", tweet, re.IGNORECASE)
-        if result != None:
-            print("Tweet: " + tweet)
-    '''
 
-    
-    
     tweet_data = loadjson("Data/gg2013.json") 
 
-    #tweet_data = loadjson(full_clean())
 
-    #print(tweet_data)
     award_list = potenchAwards(filterAwardTweets(tweet_data))
     #print(award_list)
     buildNoms(award_list)
-
-    #print(humanReadable(award_list))
-    
-    print(humanReadable(award_list))
     
     output = {}
     output["Host: "] = get_hosts()
     for award in award_list:
         output[award.names] = {
             "Presenters" : award.presenters,
-            "Nominees" : award.Nominee,
+            "Nominees" : get_nominees_list(award.Nominee),
             "Winner" : award.winner
         }
 

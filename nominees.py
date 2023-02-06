@@ -6,6 +6,7 @@
 import json
 from gg_api import buildConfidence
 from gg_api import get_winner
+from load_imdb import load_in
 import nltk
 import re
 import en_core_web_sm
@@ -158,6 +159,7 @@ def actorCheck(actor_list, name_dict):
 # award is inputed as a string
 def getFinalNoms(award):
     cleaned_tweet_data = loadjson("Data/cleaned_tweets.txt")
+    load_in()
     actor_list = loadjson("Data/actor_list.txt")
     is_actor = False
 
