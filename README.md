@@ -1,5 +1,6 @@
 # CS337 Project 1: Twitter
 Golden Globe Project Master
+By Callum Bondy (cbf3357), Helena Guajardo (hcg8373), and Hayden Ufberg (hbu8846)
 
 The adress for the github repository is: https://github.com/cbondy100/CS337-Project-1
 
