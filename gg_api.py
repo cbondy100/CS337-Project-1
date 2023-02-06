@@ -3,9 +3,12 @@ import json
 import csv
 import re
 from nominees import *
+from clean_data import *
+from collections import Counter
+from presenters import *
+from host import *
 
-#Initial Python File
-def loadjson():
+def loadjson(file):
     #Load in JSON
     #JSON Structure:
     # { "text": whatever the text of the tweet holds
@@ -13,28 +16,19 @@ def loadjson():
     #   "id": tweet id
     #   "timestamp_ms": time of tweet (Long float structure)
     # }
-
-    file = open("Data/gg2013.json")
-    data = json.load(file)
-
+    with open(file, "r") as fp:
+        data = json.load(fp)
     return data
-
-def loadIMDb():
-    pass
 
 #OFFICIAL_AWARDS_1315 = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 #OFFICIAL_AWARDS_1819 = ['best motion picture - drama', 'best motion picture - musical or comedy', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best performance by an actress in a motion picture - musical or comedy', 'best performance by an actor in a motion picture - musical or comedy', 'best performance by an actress in a supporting role in any motion picture', 'best performance by an actor in a supporting role in any motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best motion picture - animated', 'best motion picture - foreign language', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best television series - musical or comedy', 'best television limited series or motion picture made for television', 'best performance by an actress in a limited series or a motion picture made for television', 'best performance by an actor in a limited series or a motion picture made for television', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best performance by an actress in a television series - musical or comedy', 'best performance by an actor in a television series - musical or comedy', 'best performance by an actress in a supporting role in a series, limited series or motion picture made for television', 'best performance by an actor in a supporting role in a series, limited series or motion picture made for television', 'cecil b. demille award']
 
 class Award:
     #initialize award
-    def __init__(self, name, nominees):
-        #Hard coded for now
-        #we should mane the name category a list of possible names
-        #for example Best Actress - Motion Picture - Drama would be:
-        # [best actress drama, best drama actress, best actress motion picture drama]
+    def __init__(self, name):
         
         self.names = name
-        self.Nominee = nominees
+        self.Nominee = []
         self.winner = ""
         self.presenters = ""
 
@@ -45,15 +39,13 @@ class Award:
             return True
         else:
             return False
-
-tweets = ["Argo wins Best Picture", "argo wins Best Motion Picture - Drama", "Django Unchained is Tarantino's best movie", "And the Award for best picture drama goes to Argo", "Zero Dark should've won Best Motion Picture - drama", "Argo win best picture award"]
-
+        
 def buildRegexWins(award, element):
     # function builds out our regular expressions
     # i think there is a better way to do this
 
     reg_ex_list = []
-    reg1 = r""+ element[0] + r".+" + award.name
+    reg1 = r""+ element[0] + r".+" + award.names
     reg2 = r".+(award).+(" + element[0] + r")"
     reg3 = r"("+ element[0] + r")\s(wins?).+"
     
@@ -64,21 +56,11 @@ def buildRegexWins(award, element):
 
 def buildRegexAward():
     reg_ex_list = []
-    #reg1 = r".+(best actress).+(nominated?).+"
-    #reg1 = r".+(wins best ).+(-).+$"
     reg2 = r".+ (best).+"
-    #reg3 = r".+ (nominated for) .+"
     reg3 = r".+ (award) .+"
     reg4 = r".+ w((?:(?:in(?:ner)|on))|ins?) .+"
     reg5 = r".+ nomin((?:(?:at(?:ed)|ion))|ee|ees?) .+"
-    #reg6 = r".+
     
-    #reg2 = r".+(nominated?)\s(for)\s(best actress).+"
-
-    #Hard coding for best actress
-    #reg3 = r".+(best actress).+(nominees?).+"
-
-    #reg_ex_list.append(reg1)
     reg_ex_list.append(reg2)
     reg_ex_list.append(reg3)
     reg_ex_list.append(reg4)
@@ -86,18 +68,17 @@ def buildRegexAward():
     
     return reg_ex_list
 
-def buildNominees(award, tweet_data):
+def filterAwardTweets(tweet_data):
     winning_tweets = []
     for tweet in tweet_data:
         text = tweet['text']
-        for name in award.names:
-            #reg_list = buildRegexNom(award, name)
-            reg_list = buildRegexAward()
-            for reg in reg_list:
-                result = re.search(reg, text, re.IGNORECASE)
-                if result != None:
-                    #print("Tweet: " + text)
-                    winning_tweets.append(text)
+
+        reg_list = buildRegexAward()
+        for reg in reg_list:
+            result = re.search(reg, text, re.IGNORECASE)
+            if result != None:
+
+                winning_tweets.append(text)
 
     return winning_tweets
 
@@ -112,7 +93,7 @@ def buildConfidence(award, tweet_data):
     # go through each tweet and each nominee
     # match family of regular expressions
     for tweet in tweet_data:
-        text = tweet['text']
+        text = tweet
         for element in award.Nominee:
             reg_list = buildRegexWins(award, element)
             
@@ -121,64 +102,75 @@ def buildConfidence(award, tweet_data):
                 
                 # check if match exists
                 if result != None:
-                    print("Tweet: " + text)
                     winning_tweets.append(text)
                     element[1] += 1
                     
     # return list of winning tweets for visualization
     return winning_tweets
 
-def get_hosts(year):
+def get_hosts():
     '''Hosts is a list of one or more strings. Do NOT change the name
     of this function or what it returns.'''
     # Your code here
+    hosts = getHost()
+
     return hosts
 
-def get_awards(year):
+def get_awards(award_list):
     '''Awards is a list of strings. Do NOT change the name
     of this function or what it returns.'''
-    # Your code here
+    awards = []
+    for award in award_list:
+        awards.append(award.names)
     return awards
 
-def get_nominees(year):
+def get_nominees(award_list):
     '''Nominees is a dictionary with the hard coded award
     names as keys, and each entry a list of strings. Do NOT change
     the name of this function or what it returns.'''
-    # Your code here
+    nominees = {}
+    for award in award_list:
+        nom_list = []
+        for nominee in award.Nominees:
+            nom_list.append(nominee[0])
+        nominees[award.name] = nom_list
     return nominees
 
 def get_winner(award):
     winner = ["", 0]
     for cand in award.Nominee:
-        print(cand)
         if cand[1] > winner[1]:
-            print("new winner")
             winner = cand
     if winner[0] != "":
         award.winner = winner[0]
     else:
         return "inconclusive"
 
+def dupAwards(awards_f, award):
+    bool = False
+    for aw in awards_f:
+        if aw.names != award.names:
+            if aw.Nominee != []:
+                if aw.Nominee == award.Nominee:
+                    bool = True
+    return bool
+
+def buildNoms(awards):
+    print("BUILDING NOMINATIONS")
+    for award in awards:
+        getFinalNoms(award)
+        getFinalPres(award)
+        if dupAwards(awards, award):
+            print("POPPED: ", award.names)
+            awards.remove(award)
+
+    return awards
 
 def potenchAwards(tweets):
     maybeAward = []
-    #patterns = [r'best+(\b\w.+)+(?= at| for)']
-    #patterns = [r'(w((?:in(?:ner)|on))|ins?)+\s(\b\w.+)+(?= at| for| in| http)']
-    #patterns = [r'best.+(?= at| for| in| http| \B#)']
-    #patterns = [r'best.+(?= for)', r'best.+\B#', r'best.+(?= at)']
-
-    #pattern1 =  [r'won\s+(\b\w.+)+(?= at| for)', r'wins\s+(\b\w.+)+(?= http)', r'won\s+(\b\w.+)+(?= http)', r'wins\s+(\b\w.+)+\B.', r'for\s+(\b\w.+)+(goes to).+\B.', r'won\s+(\b\w.+)+\B.', r'for\s+(\b\w.+)+(goes to).+\B#', r'(nominated for)\s+(\b\w.+)+(?= at| for)']
-    
-        #in this iteration, refine to most specific 
-    #for tweet in tweets:
-        #tweet = tweet.lower()
-       # for pattern in patterns:
-            #matches = re.findall(pattern, tweet)
-            #for award in matches:
-               # maybeAward.append(award)
     pattern = re.compile("Best ([A-z\s-]+)[A-Z][a-z]*[^A-z]")
     maybeAward = [pattern.search(tweet).group(0)[:-1] for tweet in tweets if pattern.search(tweet)]
-    #pattern1 = re.compile(".*^((?!(goes|was|award|win| is| to)).)*$")
+
     pattern1 = re.compile(".*^((?!(goes|but|award|is|win)).)*$")
     maybeAward = [pattern1.match(tweet).group(0).lower() for tweet in maybeAward if pattern1.match(tweet)]
 
@@ -192,39 +184,36 @@ def potenchAwards(tweets):
         if words > 2 and words < 10: 
             huh.append(award)
 
-    #pattern2 = re.compile('.+(?= at)')
-    #huh = [pattern2.match(tweet).group(0) for tweet in huh if pattern2.match(tweet)]
-    
-        
-
-                    #words = award.split()
-                    #if ("for" or "in" or "at" or "#" or "http") in words:
-                        #awd = words[:words.index()]
-                        #maybeAward.append(words[:words.index("for")])
-                    #else:
-                       #maybeAward.append(award)
-    
-    #phrase_counts = dict(Counter(maybeAward))
 
     phrase_counts = dict(Counter(huh))
-    award_list = dict(sorted(phrase_counts.items(), key=lambda x: x[1], reverse=True))
+    award_list = sorted(phrase_counts.items(), key=lambda x: x[1], reverse=True)
     awdls2 = []
+    threshold = award_list[0][1] / 25
+    awards = []
+
     for awd in award_list:
-        if phrase_counts[awd] > 1:
-            awdls2.append(awd)
+        if awd[1] > threshold:
+            award = Award(awd[0])
+            awards.append(award)
 
-    return awdls2     
+    return awards
 
-def get_presenters(year):
+def get_presenters(award_list):
     '''Presenters is a dictionary with the hard coded award
     names as keys, and each entry a list of strings. Do NOT change the
     name of this function or what it returns.'''
-    # Your code here
+    presenters = {}
+    for award in award_list:
+        prez_list = []
+        for prez in award.presenters:
+            prez_list.append(prez)
+        presenters[award.name] = prez_list
     return presenters
 
 def humanReadable(awards):
+    print("Hosts: ", get_hosts())
     for award in awards:
-        print("Award:", award.name, "\nPresenters:", award.presenter, "\nNominees: ", award.Nominee, "\nWeiner: ", award.winner, "\n\n")
+        print("Award:", award.names, "\nPresenters:", award.presenters, "\nNominees: ", award.Nominee, "\nWinner: ", award.winner, "\n\n")
     
 def pre_ceremony():
     '''This function loads/fetches/processes any data your program
@@ -243,21 +232,9 @@ def main():
     what it returns.'''
     # Your code here
     # this function loads in our twitter database and stores it in variable
-    print('START OF CODE')
-    tweet_data = loadjson()
-    hard_code_nom = [["Argo", 0], ["Django Unchained", 0], ["Life of Pi", 0], ["Lincoln", 0], ["Zero Dark Thirty", 0]]
-    golden_globes = Award("Best Actress", hard_code_nom)
-
-    hard_code_nom2 = [["Jessica Chastain", 0], ["Marion Cotillard", 0], ["Helen Mirren", 0], ["Naomi Watts", 0], ["Rachel Weisz", 0]]
-    hc_award_names = ["Best Actress Drama", "Best Drama Actress", "Best Actress Motion Picture Drama", "Best Actress - Motion Picture - Drama"]
+   # print('START OF CODE')
     
-    golden_globes2 = Award(hc_award_names, hard_code_nom2)
-    
-    #winner = buildConfidence(golden_globes2, tweet_data)
-    #print(winner)
-    #get_winner(golden_globes2)
-
-    #print("Winner: " + golden_globes2.winner)
+    '''
     winning_noms = buildNominees(golden_globes2, tweet_data)
     print(len(winning_noms))
     print("BARRIER")
@@ -265,18 +242,41 @@ def main():
         result = re.search(r"^(?!.*TV).*(drama).*$", tweet, re.IGNORECASE)
         if result != None:
             print("Tweet: " + tweet)
+    '''
 
+    
+    
+    tweet_data = loadjson("Data/gg2013.json") 
 
-    phrase_counts = potenchAwards(winning_noms)
-    print("Phrase Counts: ", phrase_counts)
+    #tweet_data = loadjson(full_clean())
 
-    awards = []
-    for awd in phrase_counts:
-        award = Award(awd, None)
-        awards.append(award)
+    #print(tweet_data)
+    award_list = potenchAwards(filterAwardTweets(tweet_data))
+    #print(award_list)
+    buildNoms(award_list)
 
+    #print(humanReadable(award_list))
+    
+    print(humanReadable(award_list))
+    
+    output = {}
+    output["Host: "] = get_hosts()
+    for award in award_list:
+        output[award.names] = {
+            "Presenters" : award.presenters,
+            "Nominees" : award.Nominee,
+            "Winner" : award.winner
+        }
+
+    
     with open("Data/output.json", "w") as file:
-        json.dump(awards, file)
+        json.dump(output, file)
+    
+
+    get_awards(award_list)
+    get_nominees(award_list)
+    get_hosts()
+    get_presenters(award_list)
 
     return
 

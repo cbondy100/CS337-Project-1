@@ -51,13 +51,9 @@ def removeTags(tweet_text):
 def cleanTweets(tweet_data):
     #print(stop_words)
     filteredTweets = []
-    #get_substring = lambda s: s.split("RT @")[0] + s.split(": ")[-1]
     for tweet in tweet_data:
-        #print("Original Tweet: " + tweet['text'])
         temp_tweet = removeLink(tweet['text'])
-        #print("Link Removed: " + temp_tweet)
         temp_tweet = removeTags(temp_tweet)
-        #print("Tags removed: " + temp_tweet)
 
         words = nltk.word_tokenize(temp_tweet)
         wordsFiltered = []
@@ -70,11 +66,12 @@ def cleanTweets(tweet_data):
     return filteredTweets
 
 def dumpJSON(tweet_list):
+    file_name = 'Data/cleaned_tweets.txt'
     with open('Data/cleaned_tweets.txt', 'w') as f:
         json.dump(tweet_list, f)
+    return file_name
 
-if __name__ == '__main__':
+def full_clean():
+    print("CLEANING TWEETS")
     tweet_data = loadjson()
-    cleaned_tweets = cleanTweets(tweet_data)
-    dumpJSON(cleaned_tweets)
-
+    return dumpJSON(cleanTweets(tweet_data))

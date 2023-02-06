@@ -1,4 +1,0 @@
-Regular Expression: Argo [a-zA-Z]+ Best Motion Picture - Drama
-Matches to --> "Argo [wins...+] Best Motion Picture - Drama
-
-Regular Expression:
