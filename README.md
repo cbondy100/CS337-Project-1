@@ -13,5 +13,6 @@ We use an IMDB dataset to check if potential nominees are actors. It is necessar
 When our API is run, it returns a human readable output with the information. 
 
 For IMDb datasets:
-name.basics.tsv.gc
+download the name.basics.tsv.gc
+It is available at this link:
 https://www.imdb.com/interfaces/
