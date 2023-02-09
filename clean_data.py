@@ -10,7 +10,7 @@ stop_words = nltk.corpus.stopwords.words('english')
 stop_words += ["rt", "congrats", "congratulations", "woah", "wow", "woo"]
 
 #Initial Python File
-def loadjson():
+def loadjson(year):
     #Load in JSON
     #JSON Structure:
     # { "text": whatever the text of the tweet holds
@@ -19,7 +19,7 @@ def loadjson():
     #   "timestamp_ms": time of tweet (Long float structure)
     # }
 
-    file = open("Data/gg2013.json")
+    file = open("Data/gg%s.json" %year)
     data = json.load(file)
 
     return data
@@ -65,13 +65,14 @@ def cleanTweets(tweet_data):
         filteredTweets.append(new_string)
     return filteredTweets
 
-def dumpJSON(tweet_list):
-    file_name = 'Data/cleaned_tweets.txt'
-    with open('Data/cleaned_tweets.txt', 'w') as f:
+def dumpJSON(tweet_list, year):
+    file_name = 'Data/cleaned_tweets%s.txt' %year
+    with open(file_name, 'w') as f:
         json.dump(tweet_list, f)
+    print("DONE CLEANING")
     return file_name
 
-def full_clean():
+def full_clean(year):
     print("CLEANING TWEETS")
-    tweet_data = loadjson()
-    return dumpJSON(cleanTweets(tweet_data))
+    tweet_data = loadjson(year)
+    return dumpJSON(cleanTweets(tweet_data), year)

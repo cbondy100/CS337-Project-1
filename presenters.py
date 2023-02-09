@@ -125,8 +125,8 @@ def actorCheck(actor_list, name_dict):
 #award example: best director motion picture
 #desired outomce: ["best director motion picture", "best director motion", "best director"]
 # award is inputed as a string
-def getFinalPres(award):
-    cleaned_tweet_data = loadjson("Data/cleaned_tweets.txt")
+def getFinalPres(award, year):
+    cleaned_tweet_data = loadjson("Data/cleaned_tweets%s.txt" %year)
     #actor_list = loadjson("Data/actor_list.txt")
     award_lis = []
     award_name = award.names

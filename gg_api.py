@@ -40,6 +40,71 @@ class Award:
         else:
             return False
         
+def get_hosts(year):
+    '''Hosts is a list of one or more strings. Do NOT change the name
+    of this function or what it returns.'''
+    # Your code here
+    print("GETTING HOST")
+    hosts = getFinalHost(year)
+
+    return hosts
+
+def get_awards(award_list):
+    '''Awards is a list of strings. Do NOT change the name
+    of this function or what it returns.'''
+    awards = []
+    for award in award_list:
+        awards.append(award.names)
+    return awards
+
+def get_nominees(award_list):
+    '''Nominees is a dictionary with the hard coded award
+    names as keys, and each entry a list of strings. Do NOT change
+    the name of this function or what it returns.'''
+    nominees = {}
+    for award in award_list:
+        nom_list = []
+        for nominee in award.Nominee:
+            nom_list.append(nominee[0])
+        nominees[award.names] = nom_list
+    return nominees
+
+def get_winner(award):
+    winner = ["", 0]
+    for cand in award.Nominee:
+        if cand[1] > winner[1]:
+            winner = cand
+    if winner[0] != "":
+        award.winner = winner[0]
+    else:
+        return "inconclusive"
+
+def get_presenters(award_list):
+    '''Presenters is a dictionary with the hard coded award
+    names as keys, and each entry a list of strings. Do NOT change the
+    name of this function or what it returns.'''
+    presenters = {}
+    for award in award_list:
+        prez_list = []
+        for prez in award.presenters:
+            prez_list.append(prez)
+        presenters[award.names] = prez_list
+    return presenters
+   
+def pre_ceremony():
+    '''This function loads/fetches/processes any data your program
+    will use, and stores that data in your DB or in a json, csv, or
+    plain text file. It is the first thing the TA will run when grading.
+    Do NOT change the name of this function or what it returns.'''
+    # Your code here
+    print("Pre-ceremony processing complete.")
+    #this is where we should clean our tweets and load in our IMDB Dataset
+    full_clean("2013")
+    global tweet_data 
+    tweet_data = loadjson("Data/gg2013.json") 
+
+    return
+
 def buildRegexWins(award, element):
     # function builds out our regular expressions
     # i think there is a better way to do this
@@ -108,44 +173,8 @@ def buildConfidence(award, tweet_data):
     # return list of winning tweets for visualization
     return winning_tweets
 
-def get_hosts():
-    '''Hosts is a list of one or more strings. Do NOT change the name
-    of this function or what it returns.'''
-    # Your code here
-    hosts = getHost()
 
-    return hosts
-
-def get_awards(award_list):
-    '''Awards is a list of strings. Do NOT change the name
-    of this function or what it returns.'''
-    awards = []
-    for award in award_list:
-        awards.append(award.names)
-    return awards
-
-def get_nominees(award_list):
-    '''Nominees is a dictionary with the hard coded award
-    names as keys, and each entry a list of strings. Do NOT change
-    the name of this function or what it returns.'''
-    nominees = {}
-    for award in award_list:
-        nom_list = []
-        for nominee in award.Nominee:
-            nom_list.append(nominee[0])
-        nominees[award.names] = nom_list
-    return nominees
-
-def get_winner(award):
-    winner = ["", 0]
-    for cand in award.Nominee:
-        if cand[1] > winner[1]:
-            winner = cand
-    if winner[0] != "":
-        award.winner = winner[0]
-    else:
-        return "inconclusive"
-
+'''
 def dupAwards(awards_f, award):
     bool = False
     for aw in awards_f:
@@ -154,13 +183,29 @@ def dupAwards(awards_f, award):
                 if aw.Nominee == award.Nominee:
                     bool = True
     return bool
+'''
+def dupAwards(awards_f, award):
+    bool = False
+    temp_l = []
+    for nom in award.Nominee:
+        temp_l.append(nom[0])
+    for aw in awards_f:
+        if aw.names != award.names:
+            temp_i = []
+            for nomm in aw.Nominee:
+                temp_i.append(nomm[0])
+            if sorted(temp_l) == sorted(temp_i):
+                bool = True
+                
+    return bool
 
 def buildNoms(awards):
     for award in awards:
-        getFinalNoms(award)
-        getFinalPres(award)
+        getFinalNoms(award, "2013")
+        getFinalPres(award, "2013")
         if dupAwards(awards, award):
             awards.remove(award)
+            print("POPPED: " + str(award))
 
     return awards
 
@@ -196,31 +241,12 @@ def potenchAwards(tweets):
 
     return awards
 
-def get_presenters(award_list):
-    '''Presenters is a dictionary with the hard coded award
-    names as keys, and each entry a list of strings. Do NOT change the
-    name of this function or what it returns.'''
-    presenters = {}
-    for award in award_list:
-        prez_list = []
-        for prez in award.presenters:
-            prez_list.append(prez)
-        presenters[award.name] = prez_list
-    return presenters
 
 def humanReadable(awards):
     print("Hosts: ", get_hosts())
     for award in awards:
         print("Award:", award.names, "\nPresenters:", award.presenters, "\nNominees: ", award.Nominee, "\nWinner: ", award.winner, "\n\n")
-    
-def pre_ceremony():
-    '''This function loads/fetches/processes any data your program
-    will use, and stores that data in your DB or in a json, csv, or
-    plain text file. It is the first thing the TA will run when grading.
-    Do NOT change the name of this function or what it returns.'''
-    # Your code here
-    print("Pre-ceremony processing complete.")
-    return
+ 
 
 def get_nominees_list(nominee_list):
     '''Nominees is a dictionary with the hard coded award
@@ -239,16 +265,14 @@ def main():
     what it returns.'''
     # Your code here
     # this function loads in our twitter database and stores it in variable
-
-    tweet_data = loadjson("Data/gg2013.json") 
-
-
+    pre_ceremony()
+    global award_list 
     award_list = potenchAwards(filterAwardTweets(tweet_data))
     #print(award_list)
     buildNoms(award_list)
     
     output = {}
-    output["Host: "] = get_hosts()
+    output["Host: "] = get_hosts("2013")
     for award in award_list:
         output[award.names] = {
             "Presenters" : award.presenters,
@@ -263,7 +287,7 @@ def main():
 
     get_awards(award_list)
     get_nominees(award_list)
-    get_hosts()
+    get_hosts("2013")
     get_presenters(award_list)
 
     return
